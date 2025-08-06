@@ -6,7 +6,7 @@ const movieResult = document.getElementById('movieResult');
 searchBtn.addEventListener('click', fetchMovie);
 
 function fetchMovie() {
-    const query = movieInput.value.trim();
+    const query = movieInput.value.trim(); //user input and trimming extra spaces
     if (!query) {
         displayError("Please enter a movie title.");
         return;
@@ -75,4 +75,36 @@ function displayMovie(data) {
     const plot = document.createElement('p');
     plot.textContent = `Plot: ${data.Plot}`;
     movieResult.appendChild(plot);
+
+    fetchWikipediaSummary(data.Title)
+}
+
+//fetching wikipedia summary for the title choosen by the user
+
+function fetchWikipediaSummary(title) {
+    const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
+    fetch(wikiApiUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.extract) {
+                // adding Wikipedia Heading
+                const wikiHeading = document.createElement('h3');
+                wikiHeading.textContent = "Wikipedia Summary";
+                movieResult.appendChild(wikiHeading);
+
+                // adding Wikipedia Summary text 
+                const wikiSummary = document.createElement('p');
+                wikiSummary.textContent = data.extract;
+                movieResult.appendChild(wikiSummary);
+
+                // Add a link to the full Wikipedia article
+                const wikiLink = document.createElement('a');
+                wikiLink.href = data.content_urls.desktop.page;
+                wikiLink.target = "_blank";
+                wikiLink.textContent = "Read more on Wikipedia";
+                wikiLink.style.display = "block";
+                wikiLink.style.marginBottom = "16px";
+                movieResult.appendChild(wikiLink);
+            }
+        })
 }
